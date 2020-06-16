@@ -2,3 +2,5 @@
 *.jugdata/
 /.tmp/
 /logs/
+*.jugdata/
+/VOCdevkit/
