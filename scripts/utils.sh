@@ -207,6 +207,44 @@ function list {
 	fi
 }
 
+function subdatasets {
+	local _VAR=0
+	while [[ $# -gt 0 ]]
+	do
+		local _arg="$1"; shift
+		case "${_arg}" in
+			--var) local _VAR=1 ;;
+			-h | --help)
+			>&2 echo "Options for $(basename "$0") are:"
+			>&2 echo "--var also list datasets variants"
+			>&2 echo "then following --"
+			datalad subdatasets --help
+			exit 1
+			;;
+			--) break ;;
+			*) >&2 echo "Unknown option [${_arg}]"; exit 3 ;;
+		esac
+	done
+
+	if [[ ${_VAR} != 0 ]]
+	then
+		datalad subdatasets $@ | grep -o ": .* (dataset)" | grep -o " .* " | grep -o "[^ ]*" | \
+		while read subds
+		do
+			echo ${subds}
+			for _d in "${subds}.var"/*
+			do
+				if [[ -d "$_d" ]]
+				then
+					echo $_d
+				fi
+			done
+		done
+	else
+		datalad subdatasets $@ | grep -o ": .* (dataset)" | grep -o " .* " | grep -o "[^ ]*"
+	fi
+}
+
 function unshare_mount {
 	if [[ ${EUID} -ne 0 ]]
 	then
